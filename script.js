@@ -1,90 +1,154 @@
 /*
-  Estrutura:
+  Estrutura atualizada:
   - 4 semanas
-  - cada semana tem 5 tarefas (Seg-Sex) baseadas no cronograma enviado
-  - calcula progresso por semana e total
-  - salva em localStorage com chave `ps_study_progress_v1`
+  - Tarefas de Seg–Sex do seu cronograma
+  - + Projetos fofos e fantasiosos ✨ em cada semana
+  - Calcula progresso por semana e total
+  - Salva em localStorage
 */
 
 const defaultData = {
   weeks: [
-    {title:'Semana 1 — Fundamentos', tasks:[
-      'Tour pela interface & workspace',
-      'Camadas: criar/organizar',
-      'Seleções básicas',
-      'Recorte com Quick Selection',
-      'Treino de brush'
-    ]},
-    {title:'Semana 2 — Ajustes & Máscaras', tasks:[
-      'Ajustes (Brightness/Hue/Curves)',
-      'Adjustment Layers',
-      'Praticar Layer Masks',
-      'Degradê e modos de mesclagem',
-      'Limpeza de imagem'
-    ]},
-    {title:'Semana 3 — Brushes & Composição', tasks:[
-      'Pincéis: Opacity/Flow',
-      'Criar e salvar pincéis',
-      'Iluminação manual (pincel)',
-      'Aplicar texturas com máscara',
-      'Estudo de paletas e recriar'
-    ]},
-    {title:'Semana 4 — Design & Portfólio', tasks:[
-      'Tipografia e hierarquia',
-      'Template para redes sociais',
-      'Mockups (inserir em objetos)',
-      'Criar mini-poster',
-      'Revisão geral'
-    ]}
+    {
+      title:'Semana 1 — Fundamentos',
+      tasks:[
+        // Tarefas originais
+        'Tour pela interface & workspace',
+        'Camadas: criar/organizar',
+        'Seleções básicas',
+        'Recorte com Quick Selection',
+        'Treino de brush',
+
+        // Projetos fofos ✨
+        '✨ Projeto: Cartão de boas-vindas mágico',
+        '✨ Projeto: Criatura mágica minimalista (cozy cute)'
+      ]
+    },
+    {
+      title:'Semana 2 — Ajustes & Máscaras',
+      tasks:[
+        'Ajustes (Brightness/Hue/Curves)',
+        'Adjustment Layers',
+        'Praticar Layer Masks',
+        'Degradê e modos de mesclagem',
+        'Limpeza de imagem',
+
+        // Projetos fofos ✨
+        '✨ Projeto: Cidade dentro da xícara (fotomanipulação mágica)',
+        '✨ Projeto: Portal para outro mundo (janela ou porta mágica)'
+      ]
+    },
+    {
+      title:'Semana 3 — Brushes & Composição',
+      tasks:[
+        'Pincéis: Opacity/Flow',
+        'Criar e salvar pincéis',
+        'Iluminação manual (pincel)',
+        'Aplicar texturas com máscara',
+        'Estudo de paletas e recriar',
+
+        // Projetos fofos ✨
+        '✨ Projeto: Criatura de luz (vagalume, borboleta mágica, espírito)',
+        '✨ Projeto: Casa aconchegante dentro de um cogumelo'
+      ]
+    },
+    {
+      title:'Semana 4 — Design & Portfólio',
+      tasks:[
+        'Tipografia e hierarquia',
+        'Template para redes sociais',
+        'Mockups (inserir em objetos)',
+        'Criar mini-poster',
+        'Revisão geral',
+
+        // Projetos fofos ✨
+        '✨ Projeto: Poster "A Jornada da Pequena Estrela"',
+        '✨ Projeto: Wallpaper "Dreamy Forest"',
+        '✨ Projeto: Mini-portfólio cozy cute (PDF ou imagem)'
+      ]
+    }
   ]
 };
 
 const STORAGE_KEY = 'ps_study_progress_v1';
 
-// carregar dados do localStorage ou criar estrutura vazia
+// carregar estado
 function loadState(){
   const raw = localStorage.getItem(STORAGE_KEY);
   if(!raw){
-    // criar estado com false em todas tasks
-    const st = {weeks: defaultData.weeks.map(w=>({title:w.title, tasks: w.tasks.map(t=>({title:t, done:false}))}))};
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(st));
+    const st = {
+      weeks: defaultData.weeks.map(w => ({
+        title: w.title,
+        tasks: w.tasks.map(t => ({ title:t, done:false }))
+      }))
+    };
+    saveState(st);
     return st;
   }
-  try { return JSON.parse(raw); } catch(e){ localStorage.removeItem(STORAGE_KEY); return loadState(); }
+  try { return JSON.parse(raw); }
+  catch {
+    localStorage.removeItem(STORAGE_KEY);
+    return loadState();
+  }
 }
-function saveState(state){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+function saveState(state){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
 
 const state = loadState();
 const weeksContainer = document.getElementById('weeksContainer');
 
 function render(){
   weeksContainer.innerHTML = '';
+
   state.weeks.forEach((week, idx) => {
-    const w = document.createElement('section');
-    w.className = 'week';
-    w.setAttribute('data-week', idx);
-    const weekNum = idx+1;
-    w.innerHTML = `
+    const weekEl = document.createElement('section');
+    weekEl.className = 'week';
+    weekEl.dataset.week = idx;
+
+    weekEl.innerHTML = `
       <h3>
         <span>${week.title}</span>
-        <span style="font-size:13px;color:var(--muted)">Semana ${weekNum}</span>
+        <span style="font-size:13px;color:var(--muted)">Semana ${idx+1}</span>
       </h3>
+
       <div class="tasks" id="tasks-${idx}"></div>
+
       <div class="week-footer">
         <div class="progress-small"><div class="bar" id="bar-${idx}"></div></div>
-        <button class="ghost" data-action="mark-week" data-week="${idx}" style="padding:8px 10px;border-radius:8px">Marcar Semana</button>
+        <button class="ghost" data-action="mark-week" data-week="${idx}" style="padding:8px 10px;border-radius:8px">
+          Marcar Semana
+        </button>
       </div>
     `;
-    weeksContainer.appendChild(w);
 
+    weeksContainer.appendChild(weekEl);
+
+    // inserir as tasks
     const tasksEl = document.getElementById(`tasks-${idx}`);
-    week.tasks.forEach((task, tindex) => {
-      const key = `w${idx}t${tindex}`;
-      const div = document.createElement('div');
-      div.className = 'task';
-      const checked = task.done ? 'checked' : '';
-      div.innerHTML = `<label><input type="checkbox" data-week="${idx}" data-task="${tindex}" ${checked} /> <div style="display:flex;flex-direction:column"><strong style="font-size:13px">${task.title}</strong><small style="color:var(--muted)">${['Seg','Ter','Qua','Qui','Sex'][tindex] || ''}</small></div></label>`;
-      tasksEl.appendChild(div);
+    week.tasks.forEach((taskObj, tIndex) => {
+      const done = taskObj.done;
+
+      const isProject = taskObj.title.includes('✨');
+
+      const taskEl = document.createElement('div');
+      taskEl.className = 'task';
+      if (isProject) taskEl.style.borderLeft = '3px solid var(--accent)';
+
+      taskEl.innerHTML = `
+        <label>
+          <input type="checkbox" data-week="${idx}" data-task="${tIndex}" ${done ? 'checked' : ''}>
+          <div style="display:flex;flex-direction:column">
+            <strong style="font-size:13px">${taskObj.title}</strong>
+            <small style="color:var(--muted)">
+              ${tIndex < 5 ? ['Seg','Ter','Qua','Qui','Sex'][tIndex] : 'Projeto ✨'}
+            </small>
+          </div>
+        </label>
+      `;
+
+      tasksEl.appendChild(taskEl);
     });
   });
 
@@ -93,88 +157,106 @@ function render(){
 }
 
 function attachListeners(){
-  document.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
-    cb.removeEventListener('change', onCheck);
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
     cb.addEventListener('change', onCheck);
   });
-  document.querySelectorAll('button[data-action="mark-week"]').forEach(btn=>{
-    btn.removeEventListener('click', onMarkWeek);
+
+  document.querySelectorAll('button[data-action="mark-week"]').forEach(btn => {
     btn.addEventListener('click', onMarkWeek);
   });
 }
 
 function onCheck(e){
-  const cb = e.target;
-  const w = Number(cb.dataset.week);
-  const t = Number(cb.dataset.task);
-  state.weeks[w].tasks[t].done = cb.checked;
+  const w = Number(e.target.dataset.week);
+  const t = Number(e.target.dataset.task);
+
+  state.weeks[w].tasks[t].done = e.target.checked;
   saveState(state);
+
   updateProgressUI();
 }
 
 function onMarkWeek(e){
-  const idx = Number(e.currentTarget.dataset.week);
-  // toggle: se alguma não está completa, completar; se todas completas, resetar
-  const allDone = state.weeks[idx].tasks.every(t=>t.done);
-  state.weeks[idx].tasks.forEach(t=> t.done = !allDone );
+  const w = Number(e.currentTarget.dataset.week);
+  const allDone = state.weeks[w].tasks.every(t => t.done);
+
+  state.weeks[w].tasks.forEach(t => t.done = !allDone);
+
   saveState(state);
   render();
 }
 
 function updateProgressUI(){
-  // por semana
   state.weeks.forEach((week, idx) => {
     const total = week.tasks.length;
-    const done = week.tasks.filter(t=>t.done).length;
-    const pct = Math.round((done/total)*100);
-    const bar = document.getElementById(`bar-${idx}`);
-    if(bar) bar.style.width = pct + '%';
+    const done = week.tasks.filter(t => t.done).length;
 
-    // stepper node
+    const pct = Math.round((done / total) * 100);
+
+    const bar = document.getElementById(`bar-${idx}`);
+    if (bar) bar.style.width = pct + '%';
+
+    // Stepper
     const stepEl = document.querySelector(`.step[data-week="${idx+1}"]`);
-    if(stepEl){
+    if (stepEl) {
       stepEl.classList.remove('completed','active');
-      if(pct === 100) stepEl.classList.add('completed');
-      if(pct > 0 && pct < 100) stepEl.classList.add('active');
+      if (pct === 100) stepEl.classList.add('completed');
+      else if (pct > 0) stepEl.classList.add('active');
     }
   });
 
-  // total
-  const totals = state.weeks.reduce((acc,w)=>acc + w.tasks.length,0);
-  const dones = state.weeks.reduce((acc,w)=>acc + w.tasks.filter(t=>t.done).length,0);
-  const totalPct = totals ? Math.round((dones/totals)*100) : 0;
-  document.getElementById('totalBar').style.width = totalPct + '%';
-  document.getElementById('doneCount').innerText = totalPct + '%';
-  document.getElementById('taskCount').innerText = `${dones} / ${totals}`;
+  // total geral
+  const totalTasks = state.weeks.reduce((acc, w) => acc + w.tasks.length, 0);
+  const doneTasks = state.weeks.reduce((acc, w) => acc + w.tasks.filter(t => t.done).length, 0);
 
-  // stepper connector fill based on completed weeks
-  const completedWeeks = state.weeks.filter(w=> w.tasks.every(t=>t.done)).length;
-  const fillEl = document.getElementById('stepFill');
-  const fillPct = (completedWeeks / state.weeks.length) * 100;
-  fillEl.style.width = fillPct + '%';
+  const pctTotal = Math.round((doneTasks / totalTasks) * 100);
+
+  document.getElementById('totalBar').style.width = pctTotal + '%';
+  document.getElementById('doneCount').innerText = pctTotal + '%';
+  document.getElementById('taskCount').innerText = `${doneTasks} / ${totalTasks}`;
+
+  const completedWeeks = state.weeks.filter(w => w.tasks.every(t => t.done)).length;
+  const stepFill = document.getElementById('stepFill');
+  stepFill.style.width = (completedWeeks / state.weeks.length) * 100 + '%';
 }
 
-// reset and export controls
-document.getElementById('resetBtn').addEventListener('click', ()=>{
-  if(!confirm('Resetar todo o progresso?')) return;
-  const fresh = {weeks: defaultData.weeks.map(w=>({title:w.title, tasks: w.tasks.map(t=>({title:t, done:false}))}))};
+// reset
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (!confirm('Resetar todo o progresso?')) return;
+
+  const fresh = {
+    weeks: defaultData.weeks.map(w => ({
+      title: w.title,
+      tasks: w.tasks.map(t => ({ title:t, done:false }))
+    }))
+  };
+
   Object.assign(state, fresh);
   saveState(state);
   render();
 });
 
-document.getElementById('exportBtn').addEventListener('click', ()=>{
+// export
+document.getElementById('exportBtn').addEventListener('click', () => {
   const summary = {
-    date: new Date().toISOString(),
-    completed: state.weeks.map((w, i)=>({
-      week:i+1, title:w.title, completed: w.tasks.filter(t=>t.done).length, total: w.tasks.length
+    date: new Date().toLocaleString('pt-BR'),
+    progress: state.weeks.map((w,i) => ({
+      week: i+1,
+      title: w.title,
+      completed: w.tasks.filter(t => t.done).length,
+      total: w.tasks.length
     }))
   };
-  const txt = 'Progresso exportado (JSON)\\n' + JSON.stringify(summary, null, 2);
-  const blob = new Blob([txt], {type:'text/plain;charset=utf-8'});
+
+  const blob = new Blob([JSON.stringify(summary,null,2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = 'ps-study-progress.txt';
-  a.click(); URL.revokeObjectURL(url);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'progresso_photoshop.json';
+  a.click();
+
+  URL.revokeObjectURL(url);
 });
 
 render();
